@@ -1,0 +1,54 @@
+package services
+
+import (
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/mamun-jsx/Go-lang-Blog-Apps/internal/auth"
+	"github.com/mamun-jsx/Go-lang-Blog-Apps/internal/models"
+	"github.com/mamun-jsx/Go-lang-Blog-Apps/internal/repositories"
+)
+
+type UserService struct {
+	repo *repositories.UserRepository
+}
+
+func NewUserService(r *repositories.UserRepository) *UserService {
+	return &UserService{repo: r}
+}
+
+// register | signup service
+func (s *UserService) Register(username, email, password string) (*models.User, error) {
+	u := &models.User{
+		ID:          uuid.New(),
+		UserName:    username,
+		Email:       email,
+		Password:    password,
+		DisplayName: username,
+		Role:        "reader",
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	hashed, err := auth.HashingPassword(password)
+	if err != nil {
+		return nil, err
+	}
+	u.Password = hashed
+	if err := s.repo.Create(u); err != nil {
+		return nil, err
+	}
+	return u, nil
+}
+
+func (s *UserService) Login(email, password string) (*models.User, string, error) {
+	u, err := s.repo.GetByEmail(email)
+	if err != nil {
+		return nil, "", err
+
+	}
+	if !auth.CheckPassword(u.password, password) {
+		return nil, "", err
+	}
+	token, _ := auth.GenerateJWT(u.ID.string(), u.Email, u.Role)
+	return u, token, nil
+}

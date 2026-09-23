@@ -19,7 +19,7 @@ func InjectDB(db *gorm.DB) echo.MiddlewareFunc {
 	}
 }
 
-func JWTMiddlewear(cfg *config.Config) echo.MiddlewareFunc {
+func JWTMiddleware(cfg *config.Config) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			authHeader := c.Request().Header.Get("Auth")
