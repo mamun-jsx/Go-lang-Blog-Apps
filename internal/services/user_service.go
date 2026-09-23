@@ -1,12 +1,11 @@
 package services
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 	"github.com/mamun-jsx/Go-lang-Blog-Apps/internal/auth"
 	"github.com/mamun-jsx/Go-lang-Blog-Apps/internal/models"
 	"github.com/mamun-jsx/Go-lang-Blog-Apps/internal/repositories"
+	"time"
 )
 
 type UserService struct {
@@ -46,9 +45,9 @@ func (s *UserService) Login(email, password string) (*models.User, string, error
 		return nil, "", err
 
 	}
-	if !auth.CheckPassword(u.password, password) {
+	if !auth.CheckPassword(u.Password, password) {
 		return nil, "", err
 	}
-	token, _ := auth.GenerateJWT(u.ID.string(), u.Email, u.Role)
+	token, _ := auth.GenerateJWT(u.ID.String(), u.Email, u.Role)
 	return u, token, nil
 }
