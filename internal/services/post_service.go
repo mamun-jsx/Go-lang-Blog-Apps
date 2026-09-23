@@ -37,7 +37,7 @@ func (s *PostService) Create(authorID uuid.UUID, title, content string, tags []s
 		CreatedAt:  now,
 		UpdatedAt:  now,
 	}
-	err := s.db.Transaction(func(tx *gorm.DB) err {
+	err := s.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(post).Error; err != nil {
 			return err
 		}
