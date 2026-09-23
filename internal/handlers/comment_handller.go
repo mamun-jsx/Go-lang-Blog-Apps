@@ -8,49 +8,46 @@ import (
 	"github.com/mamun-jsx/Go-lang-Blog-Apps/internal/utils"
 )
 
-type AuthHandler struct {
-	Service *services.UserService
+type CommentHandler struct {
+	Service *services.CommentService
 }
 
-func NewAuthHandler(s *services.UserService) *AuthHandler {
-	return &AuthHandler{Service: s}
+func NewCommentHandler(s *services.CommentService) *CommentHandler {
+	return &CommentHandler{Service: s}
 }
 
-type SignUpReq struct {
-	UserName    string `json:"user_name,omitempty"`
-	Email       string `json:"email,omitempty"`
-	Password    string `json:"password,omitempty"`
-	DisplayName string `json:"display_name,omitempty"`
+type AddCommentReq struct {
+	Content  string  `json:"content,omitempty"`
+	ParentID *string `json:"parent_id,omitempty"`
 }
 
-func (h *AuthHandler) Signup(c echo.Context) error {
-	var req SignUpReq
+func (h *CommentHandler) Add(c echo.Context) error {
+	postID := c.Param("id")
+	var req AddCommentReq
 	if err := c.Bind(&req); err != nil {
 		return utils.Err(c, http.StatusBadRequest, "invalid payload")
-	}
-	u, err := h.Service.Register(req.UserName, req.Email, req.Password)
 
+	}
+	var userID *string
+	if u := c.Get("user_id"); u != nil {
+		uid := u.(string)
+		userID = &uid
+	}
+	comment, err := h.Service.Add(postID, userID, req.ParentID, req.Content)
 	if err != nil {
-		return utils.Err(c, http.StatusBadRequest, err.Error())
+		return utils.Err(c, http.StatusInternalServerError, err.Error())
 
 	}
-	return utils.JSON(c, http.StatusCreated, true, "user_created", u)
-
+	return utils.JSON(c, http.StatusCreated, true, "comment added", comment)
 }
 
-type login struct {
-	Email    string `json:"email,omitempty"`
-	Password string `json:"password,omitempty"`
-}
-
-func (h *AuthHandler) Login(c echo.Context) error {
-	var req login
-	if err := c.Bind(&req); err != nil {
-		return utils.Err(c, http.StatusBadRequest, "invalid payload")
-	}
-	user, token, err := h.Service.Login(req.Email, req.Password)
+func (h *CommentHandler) List(c echo.Context) error {
+	postID := c.Param(":id")
+	comment, err := h.Service.ListByPost(postID)
 	if err != nil {
-		return utils.Err(c, http.StatusBadRequest, "invalid credentials ")
+		return utils.Err(c, http.StatusInternalServerError, err.Error())
+
 	}
-	return utils.JSON(c, http.StatusOK, true, "login succesfull", map[string]interface{}{"token": token, "user": user})
+	return utils.JSON(c, http.StatusOK, true, "comment", comment)
+
 }
