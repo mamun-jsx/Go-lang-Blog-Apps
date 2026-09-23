@@ -23,8 +23,7 @@ func newPostService(r *repositories.PostRepository, db *gorm.DB) *PostService {
 	}
 }
 
-
-// create a post 
+// create a post
 func (s *PostService) Create(authorID uuid.UUID, title, content string, tags []string) (*models.Post, error) {
 
 	now := time.Now()
@@ -66,4 +65,10 @@ func (s *PostService) Create(authorID uuid.UUID, title, content string, tags []s
 		return nil, err
 	}
 	return post, nil
+}
+
+// delete post
+
+func (s *PostService) Delete(id string) error {
+	return s.repo.DeletePost(id)
 }
