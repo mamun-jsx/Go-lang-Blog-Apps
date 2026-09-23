@@ -7,23 +7,23 @@ import (
 )
 
 type APIResponse struct {
-	Success bool        `json:"success"`
-	Message string      `json:"message,omitempty"`
-	Data    interface{} `json:"data,omitempty"`
+	Success bool   `json:"success"`
+	Message string `json:"message,omitempty"`
+	Data    any    `json:"data,omitempty"`
 }
 
-func Success(c echo.Context, data interface{}, msg string) error {
+func Success(c *echo.Context, data any, msg string) error {
 	if msg == "" {
 		msg = "OK"
 	}
 	return c.JSON(http.StatusOK, APIResponse{Success: true, Message: msg, Data: data})
 }
 
-func Error(c echo.Context, code int, msg string) error {
+func Error(c *echo.Context, code int, msg string) error {
 	return c.JSON(code, APIResponse{Success: false, Message: msg})
 }
 
-func ParseIntQuery(c echo.Context, key string, def int) int {
+func ParseIntQuery(c *echo.Context, key string, def int) int {
 	v := c.QueryParam(key)
 	if v == "" {
 		return def
@@ -33,7 +33,7 @@ func ParseIntQuery(c echo.Context, key string, def int) int {
 	}
 	return def
 }
-func JSON(c echo.Context, code int, success bool, msg string, data interface{}) error {
+func JSON(c *echo.Context, code int, success bool, msg string, data any) error {
 	return c.JSON(code, APIResponse{
 		Success: success,
 		Message: msg,
@@ -41,11 +41,11 @@ func JSON(c echo.Context, code int, success bool, msg string, data interface{}) 
 	})
 }
 
-func OK(c echo.Context, data interface{}) error {
+func OK(c *echo.Context, data any) error {
 	return JSON(c, http.StatusOK, true, "OK", data)
 }
 
-func Err(c echo.Context, code int, msg string) error {
+func Err(c *echo.Context, code int, msg string) error {
 	return JSON(c, code, false, msg, nil)
 }
 func MakeSlug(s string) string {

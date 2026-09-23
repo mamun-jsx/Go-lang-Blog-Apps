@@ -10,10 +10,9 @@ import (
 	"gorm.io/gorm"
 )
 
-
-// database connection 
+// database connection
 func Connect(cfg *config.Config) (*gorm.DB, error) {
-	dns := fmt.Sprintf("host:%s user:%s password:%s dbname:%s port:%s sslmode=disable", cfg.DBHost, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBPort)
+	dns := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", cfg.DBHost, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBPort)
 
 	db, err := gorm.Open(postgres.Open(dns), &gorm.Config{})
 	if err != nil {
@@ -23,12 +22,10 @@ func Connect(cfg *config.Config) (*gorm.DB, error) {
 		&models.User{},
 		&models.Comment{},
 		&models.Post{},
-		&models.Reaction{},
-		&models.Tag{},
 	)
 	if err != nil {
 		log.Fatal("som error to auto migrate")
 	}
-	log.Panicln("Successfully connected to postgreSQL")
+	log.Println("Successfully connected to postgreSQL")
 	return db, nil
 }

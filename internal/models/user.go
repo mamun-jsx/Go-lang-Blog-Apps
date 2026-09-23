@@ -22,7 +22,6 @@ type User struct {
 
 	// relation with post
 
-	Posts    []Post     `gorm:"foreignKey:AuthorID"json:"posts,omitempty"`
-	Comments []Comment  `gorm:"foreignKey:UserId" json:"comment"`
-	Reacts   []Reaction `gorm"foreignKey:UserID"json:"reacts"`
+	Posts    []Post    `gorm:"foreignKey:AuthorID" json:"posts,omitempty"`
+	Comments []Comment `gorm:"foreignKey:UserId" json:"comment"`
 }

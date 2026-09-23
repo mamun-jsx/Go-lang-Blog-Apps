@@ -14,7 +14,7 @@ type Server struct {
 
 func NewServer(cfg *config.Config, db *gorm.DB) *Server {
 	e := echo.New()
-	// RegisterRoutes(e, db, cfg)
+	RegisterRoutes(e, db, cfg)
 	return &Server{E: e, DB: db, Cfg: cfg}
 }
 

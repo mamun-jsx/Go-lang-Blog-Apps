@@ -29,3 +29,19 @@ func (r *CommentRepository) ListByPost(postId string) ([]models.Comment, error) 
 	}
 	return cs, nil
 }
+
+func (r *CommentRepository) GetByID(id string) (*models.Comment, error) {
+	var c models.Comment
+	if err := r.db.Where("id=?", id).First(&c).Error; err != nil {
+		return nil, err
+	}
+	return &c, nil
+}
+
+func (r *CommentRepository) Update(c *models.Comment) error {
+	return r.db.Save(c).Error
+}
+
+func (r *CommentRepository) Delete(id string) error {
+	return r.db.Delete(&models.Comment{}, "id=?", id).Error
+}

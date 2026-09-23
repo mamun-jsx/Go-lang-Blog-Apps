@@ -30,7 +30,7 @@ func (r *PostRepository) GetAll() ([]models.Post, error) {
 
 func (r *PostRepository) GetByID(id string) (*models.Post, error) {
 	var post models.Post
-	err := r.db.Preload("Comments").Preload("Reactions").Preload("Tags").Where("id=?", id).First(&post).Error
+	err := r.db.Preload("Comments").Where("id=?", id).First(&post).Error
 	if err != nil {
 		return nil, err
 	}
@@ -43,10 +43,7 @@ func (r *PostRepository) DeletePost(id string) error {
 
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		var post models.Post
-		if err := tx.Preload("Tags").First(&post, "id=?", id).Error; err != nil {
-			return nil
-		}
-		if err := tx.Model(&post).Association("Tags").Clear(); err != nil {
+		if err := tx.First(&post, "id=?", id).Error; err != nil {
 			return nil
 		}
 		if err := tx.Delete(&post).Error; err != nil {

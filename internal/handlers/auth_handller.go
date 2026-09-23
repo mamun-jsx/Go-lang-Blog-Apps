@@ -23,7 +23,7 @@ type SignUpReq struct {
 	DisplayName string `json:"display_name,omitempty"`
 }
 
-func (h *AuthHandler) Signup(c echo.Context) error {
+func (h *AuthHandler) Signup(c *echo.Context) error {
 	var req SignUpReq
 	if err := c.Bind(&req); err != nil {
 		return utils.Err(c, http.StatusBadRequest, "invalid payload")
@@ -43,7 +43,7 @@ type login struct {
 	Password string `json:"password,omitempty"`
 }
 
-func (h *AuthHandler) Login(c echo.Context) error {
+func (h *AuthHandler) Login(c *echo.Context) error {
 	var req login
 	if err := c.Bind(&req); err != nil {
 		return utils.Err(c, http.StatusBadRequest, "invalid payload")

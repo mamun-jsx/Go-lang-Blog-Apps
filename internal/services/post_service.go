@@ -16,7 +16,7 @@ type PostService struct {
 	db   *gorm.DB
 }
 
-func newPostService(r *repositories.PostRepository, db *gorm.DB) *PostService {
+func NewPostService(r *repositories.PostRepository, db *gorm.DB) *PostService {
 	return &PostService{
 		repo: r,
 		db:   db,
@@ -24,7 +24,7 @@ func newPostService(r *repositories.PostRepository, db *gorm.DB) *PostService {
 }
 
 // create a post
-func (s *PostService) Create(authorID uuid.UUID, title, content string, tags []string) (*models.Post, error) {
+func (s *PostService) Create(authorID uuid.UUID, title, content string) (*models.Post, error) {
 
 	now := time.Now()
 	post := &models.Post{
@@ -41,24 +41,6 @@ func (s *PostService) Create(authorID uuid.UUID, title, content string, tags []s
 		if err := tx.Create(post).Error; err != nil {
 			return err
 		}
-		for _, tagName := range tags {
-			var tag models.Tag
-			if err := tx.Where("name=?", tagName).First(&tag).Error; err != nil {
-				tag = models.Tag{
-					ID:        uuid.New(),
-					Name:      tagName,
-					Slug:      utils.MakeSlugSimple(tagName),
-					CreatedAt: now,
-					UpdatedAt: now,
-				}
-				if err := tx.Create(&tag).Error; err != nil {
-					return err
-				}
-				if err := tx.Model(post).Association("Tags").Append(&tag); err != nil {
-					return nil
-				}
-			}
-		}
 		return nil
 	})
 	if err != nil {
@@ -67,15 +49,23 @@ func (s *PostService) Create(authorID uuid.UUID, title, content string, tags []s
 	return post, nil
 }
 
-// delete post
+// get all posts
+func (s *PostService) GetAll() ([]models.Post, error) {
+	return s.repo.GetAll()
+}
 
+// get post by id
+func (s *PostService) GetByID(id string) (*models.Post, error) {
+	return s.repo.GetByID(id)
+}
+
+// delete post
 func (s *PostService) Delete(id string) error {
 	return s.repo.DeletePost(id)
 }
 
-// update A single post
-
-func (s *PostService) Update(postID string, title string, content string, tags []string) (*models.Post, error) {
+// update a single post
+func (s *PostService) Update(postID string, title string, content string) (*models.Post, error) {
 	post, err := s.repo.GetByID(postID)
 	if err != nil {
 		return nil, err
@@ -90,39 +80,9 @@ func (s *PostService) Update(postID string, title string, content string, tags [
 		if err := tx.Save(&post).Error; err != nil {
 			return err
 		}
-
-		if len(tags) > 0 {
-			var tagModels []models.Tag
-			for _, tagName := range tags {
-				var tag models.Tag
-				if err := tx.Where("name = ?", tagName).First(&tag).Error; err != nil {
-					// Fixed: Added missing commas inside the struct literal
-					tag = models.Tag{
-						ID:        uuid.New(),
-						Name:      tagName,
-						Slug:      utils.MakeSlugSimple(tagName),
-						CreatedAt: time.Now(),
-						UpdatedAt: time.Now(),
-					}
-					if err := tx.Create(&tag).Error; err != nil {
-						return err
-					}
-				}
-				tagModels = append(tagModels, tag)
-			} // Loop ends here cleanly
-
-			// Fixed: Clear and Append moved OUTSIDE the loop so it updates all tags at once
-			if err := tx.Model(&post).Association("Tags").Clear(); err != nil {
-				return err
-			}
-			if err := tx.Model(&post).Association("Tags").Append(tagModels); err != nil {
-				return err
-			}
-		}
 		return nil
-	}) // Transaction block ends here
+	})
 
-	// Fixed: Return structure for the outer UpdatePost function
 	if err != nil {
 		return nil, err
 	}

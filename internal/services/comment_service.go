@@ -26,8 +26,6 @@ func (s *CommentService) Add(postID string, userID *string, parentId *string, co
 	if err := s.db.First(&post, "id=?", postID).Error; err != nil {
 		return nil, err
 	}
-	// proceed with comment creation
-	// now := time.Now()
 
 	comment := &models.Comment{
 		ID:        uuid.New(),
@@ -54,6 +52,23 @@ func (s *CommentService) Add(postID string, userID *string, parentId *string, co
 	return comment, nil
 }
 
-func (s CommentService) ListByPost(postID string) ([]models.Comment, error) {
+func (s *CommentService) ListByPost(postID string) ([]models.Comment, error) {
 	return s.repo.ListByPost(postID)
+}
+
+func (s *CommentService) Update(commentID string, content string) (*models.Comment, error) {
+	comment, err := s.repo.GetByID(commentID)
+	if err != nil {
+		return nil, err
+	}
+	comment.Content = content
+	comment.UpdatedAt = time.Now()
+	if err := s.repo.Update(comment); err != nil {
+		return nil, err
+	}
+	return comment, nil
+}
+
+func (s *CommentService) Delete(commentID string) error {
+	return s.repo.Delete(commentID)
 }

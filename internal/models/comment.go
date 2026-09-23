@@ -7,18 +7,18 @@ import (
 )
 
 type Comment struct {
-	ID         uuid.UUID  `gorm:"type:uuid;uuid_generate_v4();primaryKey" json:"id"`
+	ID         uuid.UUID  `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	PostID     uuid.UUID  `gorm:"type:uuid;not null" json:"post_id"`
 	UserID     *uuid.UUID `gorm:"type:uuid" json:"user_id"`
-	ParentId   *uuid.UUID `gorm:"type:uuid" json:"parent_uuid"`
+	ParentId   *uuid.UUID `gorm:"type:uuid" json:"parent_id"`
 	Content    string     `gorm:"type:text;not null" json:"content"`
 	IsApproved bool       `gorm:"default:true" json:"is_approved"`
-	CreatedAt  time.Time  `json:"created_at`
-	UpdatedAt  time.Time  `json:"updated_at`
+	CreatedAt  time.Time  `json:"created_at"`
+	UpdatedAt  time.Time  `json:"updated_at"`
+
 	// relations
 
-	User   User     `gorm:foreignKey:"UserID" json:"user"`
+	User   User     `gorm:"foreignKey:UserID" json:"user"`
 	Post   Post     `gorm:"foreignKey:PostID" json:"post"`
-	Parent *Comment `gorm:"foreignKey:ParentID json:"parent"`
+	Parent *Comment `gorm:"foreignKey:ParentId" json:"parent"`
 }
-
