@@ -25,3 +25,13 @@ func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
 	}
 	return &u, nil
 }
+
+// get a single user by id
+func (r *UserRepository) GetByID(id string) (*models.User, error) {
+	var u models.User
+	if err := r.db.Where("id=?", id).First(&u).Error; err != nil {
+		return nil, err
+
+	}
+	return &u, nil
+}
